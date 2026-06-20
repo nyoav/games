@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<!-- saved from url=(0123)file:///Users/yoavnamir/Documents/Codex/2026-06-19/game-studio-plugin-game-studio-openai-2/outputs/retro-falcon-patrol.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retro Falcon Patrol</title>
+  <style>
+    :root {
+      --bg: #020711;
+      --ink: #d7ffe1;
+      --green: #58ff76;
+      --frame: #3dcc63;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+      color: var(--ink);
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+    }
+
+    .game-shell {
+      position: relative;
+      width: min(96vw, 1120px);
+      aspect-ratio: 16 / 9;
+      max-height: 94vh;
+      border: 4px solid var(--frame);
+      background: var(--bg);
+      box-shadow:
+        0 0 0 4px #05140a,
+        0 0 28px rgba(88, 255, 118, 0.24);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      background: var(--bg);
+    }
+
+    .screen-title {
+      position: absolute;
+      left: 14px;
+      bottom: 10px;
+      z-index: 2;
+      color: rgba(215, 255, 225, 0.8);
+      font-size: clamp(11px, 1.6vw, 18px);
+      font-weight: 900;
+      letter-spacing: 0;
+      pointer-events: none;
+      text-transform: uppercase;
+      text-shadow: 2px 2px 0 #020711;
+    }
+
+    .info-screen {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      display: grid;
+      place-items: center;
+      padding: clamp(18px, 4vw, 44px);
+      pointer-events: none;
+      color: var(--ink);
+      background: rgba(2, 7, 17, 0.9);
+      opacity: 0;
+      transition: opacity 120ms linear;
+    }
+
+    .info-screen.is-visible {
+      opacity: 1;
+    }
+
+    .info-panel {
+      width: min(760px, 100%);
+      border: 4px solid var(--frame);
+      padding: clamp(16px, 3.4vw, 30px);
+      background: #020711;
+      text-transform: uppercase;
+      box-shadow:
+        0 0 0 4px #020711,
+        0 0 22px rgba(88, 255, 118, 0.26);
+    }
+
+    .info-panel h2 {
+      margin: 0 0 18px;
+      color: var(--green);
+      font-size: clamp(28px, 5vw, 56px);
+      line-height: 1;
+      letter-spacing: 0;
+      text-align: center;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px clamp(18px, 4vw, 38px);
+      font-size: clamp(13px, 2vw, 21px);
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .info-grid h3 {
+      margin: 0 0 8px;
+      color: var(--green);
+      font-size: clamp(16px, 2.5vw, 25px);
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .info-grid p {
+      margin: 4px 0;
+    }
+
+    .info-close {
+      margin-top: 22px;
+      color: var(--green);
+      font-size: clamp(13px, 2vw, 22px);
+      font-weight: 900;
+      text-align: center;
+    }
+
+    @media (max-width: 620px) {
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game-shell" aria-label="Retro Falcon Patrol game">
+    <canvas id="gameCanvas" aria-hidden="true" width="1112" height="622"></canvas>
+    <div class="screen-title">Retro Falcon Patrol | I Controls</div>
+    <section class="info-screen" id="infoScreen" aria-live="polite">
+      <div class="info-panel">
+        <h2>Controls</h2>
+        <div class="info-grid">
+          <div>
+            <h3>Move</h3>
+            <p>P = Up</p>
+            <p>L = Down</p>
+            <p>N = Left</p>
+            <p>M = Right</p>
+          </div>
+          <div>
+            <h3>Weapon</h3>
+            <p>Space = Fire</p>
+            <p>Hold Space = Rapid Fire</p>
+          </div>
+          <div>
+            <h3>Game</h3>
+            <p>R = Restart After Game Over</p>
+            <p>I = Show / Hide Controls</p>
+          </div>
+          <div>
+            <h3>Goal</h3>
+            <p>Avoid enemies, missiles, turrets, and terrain.</p>
+            <p>Shoot enemies and survive as long as possible.</p>
+          </div>
+        </div>
+        <div class="info-close">Press I to return</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const infoScreen = document.getElementById("infoScreen");
+
+      // The simulation uses a fixed arcade resolution and scales to the page.
+      const WIDTH = 960;
+      const HEIGHT = 540;
+      const TERRAIN_STEP = 48;
+      const TERRAIN_MIN = 365;
+      const TERRAIN_MAX = 500;
+      const PLAYER_START_X = 92;
+      const PLAYER_START_Y = 230;
+      const PLAYER_W = 46;
+      const PLAYER_H = 22;
+      const MAX_LIVES = 3;
+
+      const keys = new Set();
+      let audioContext = null;
+      let musicStarted = false;
+      let nextMusicNoteTime = 0;
+      let musicStep = 0;
+      let state = createGameState();
+
+      const MUSIC_LEAD = [
+        392, 494, 587, null,
+        523, 494, 392, null,
+        330, 392, 494, 523,
+        494, null, 392, null
+      ];
+      const MUSIC_BASS = [98, null, 98, null, 130, null, 110, null];
+
+      function randomRange(min, max) {
+        return min + Math.random() * (max - min);
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function rectsOverlap(a, b) {
+        return (
+          a.x < b.x + b.w &&
+          a.x + a.w > b.x &&
+          a.y < b.y + b.h &&
+          a.y + a.h > b.y
+        );
+      }
+
+      function createPlayer() {
+        return {
+          x: PLAYER_START_X,
+          y: PLAYER_START_Y,
+          w: PLAYER_W,
+          h: PLAYER_H,
+          cooldown: 0,
+          invincible: 1.35,
+          enginePulse: 0
+        };
+      }
+
+      function createInitialTerrain() {
+        const points = [];
+        const turrets = [];
+        let y = 432;
+
+        // Build enough terrain ahead of the first screen for a seamless start.
+        for (let x = -TERRAIN_STEP; x < WIDTH + 900; x += TERRAIN_STEP) {
+          y = clamp(y + randomRange(-24, 26), TERRAIN_MIN, TERRAIN_MAX);
+          points.push({ x, y });
+
+          if (x > 420 && Math.random() < 0.1) {
+            turrets.push(makeTurret(x + randomRange(8, 34)));
+          }
+        }
+
+        return { points, turrets };
+      }
+
+      function makeTurret(worldX) {
+        return {
+          worldX,
+          cooldown: randomRange(0.6, 2.3),
+          destroyed: false
+        };
+      }
+
+      function createStars() {
+        const stars = [];
+
+        for (let i = 0; i < 82; i += 1) {
+          stars.push({
+            x: randomRange(0, WIDTH),
+            y: randomRange(34, 330),
+            size: Math.random() < 0.72 ? 2 : 3,
+            speed: randomRange(12, 42)
+          });
+        }
+
+        return stars;
+      }
+
+      function createClouds() {
+        const clouds = [];
+
+        for (let i = 0; i < 8; i += 1) {
+          clouds.push({
+            x: randomRange(0, WIDTH),
+            y: randomRange(56, 225),
+            w: randomRange(58, 118),
+            speed: randomRange(16, 34)
+          });
+        }
+
+        return clouds;
+      }
+
+      function createGameState() {
+        const terrain = createInitialTerrain();
+
+        return {
+          player: createPlayer(),
+          lives: MAX_LIVES,
+          score: 0,
+          time: 0,
+          scrollX: 0,
+          lastTime: 0,
+          gameOver: false,
+          terrainPoints: terrain.points,
+          turrets: terrain.turrets,
+          stars: createStars(),
+          clouds: createClouds(),
+          bullets: [],
+          enemies: [],
+          enemyShots: [],
+          particles: [],
+          infoOpen: false,
+          enemySpawnTimer: 0.7
+        };
+      }
+
+      function setInfoOpen(isOpen) {
+        state.infoOpen = isOpen;
+        infoScreen.classList.toggle("is-visible", state.infoOpen);
+      }
+
+      function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.height * dpr);
+        ctx.setTransform(
+          canvas.width / WIDTH,
+          0,
+          0,
+          canvas.height / HEIGHT,
+          0,
+          0
+        );
+      }
+
+      function getAudioContext() {
+        const AudioCtor = window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioCtor) {
+          return null;
+        }
+
+        if (!audioContext) {
+          audioContext = new AudioCtor();
+        }
+
+        if (audioContext.state === "suspended") {
+          audioContext.resume();
+        }
+
+        return audioContext;
+      }
+
+      function startMusic(audio) {
+        if (!audio || musicStarted) {
+          return;
+        }
+
+        musicStarted = true;
+        musicStep = 0;
+        nextMusicNoteTime = audio.currentTime;
+      }
+
+      function wakeAudio() {
+        const audio = getAudioContext();
+        startMusic(audio);
+        return audio;
+      }
+
+      function scheduleTone(frequency, startTime, duration, volume, type) {
+        const audio = getAudioContext();
+
+        if (!audio || !frequency) {
+          return;
+        }
+
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, startTime);
+        gain.gain.setValueAtTime(0.0001, startTime);
+        gain.gain.exponentialRampToValueAtTime(volume, startTime + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(startTime);
+        osc.stop(startTime + duration + 0.02);
+      }
+
+      function updateMusic() {
+        if (!musicStarted || !audioContext || audioContext.state !== "running") {
+          return;
+        }
+
+        const stepDuration = 0.18;
+
+        while (nextMusicNoteTime < audioContext.currentTime + 0.12) {
+          const lead = MUSIC_LEAD[musicStep % MUSIC_LEAD.length];
+          const bass = MUSIC_BASS[musicStep % MUSIC_BASS.length];
+          const isGameOver = state.gameOver;
+
+          if (lead && !isGameOver) {
+            scheduleTone(lead, nextMusicNoteTime, 0.075, 0.035, "square");
+          }
+
+          if (bass) {
+            scheduleTone(bass, nextMusicNoteTime, 0.12, isGameOver ? 0.018 : 0.028, "triangle");
+          }
+
+          if (musicStep % 4 === 2 && !isGameOver) {
+            scheduleTone(lead ? lead * 2 : 784, nextMusicNoteTime + 0.055, 0.04, 0.018, "square");
+          }
+
+          musicStep += 1;
+          nextMusicNoteTime += stepDuration;
+        }
+      }
+
+      function playShootSound() {
+        const audio = wakeAudio();
+
+        if (!audio) {
+          return;
+        }
+
+        const now = audio.currentTime;
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+
+        osc.type = "square";
+        osc.frequency.setValueAtTime(780, now);
+        osc.frequency.exponentialRampToValueAtTime(1180, now + 0.045);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.exponentialRampToValueAtTime(0.1, now + 0.008);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      }
+
+      function playExplosionSound() {
+        const audio = wakeAudio();
+
+        if (!audio) {
+          return;
+        }
+
+        const now = audio.currentTime;
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+        const noise = audio.createBufferSource();
+        const noiseGain = audio.createGain();
+        const buffer = audio.createBuffer(1, audio.sampleRate * 0.16, audio.sampleRate);
+        const channel = buffer.getChannelData(0);
+
+        for (let i = 0; i < channel.length; i += 1) {
+          channel[i] = (Math.random() * 2 - 1) * (1 - i / channel.length);
+        }
+
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.exponentialRampToValueAtTime(42, now + 0.18);
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+        noise.buffer = buffer;
+        noiseGain.gain.setValueAtTime(0.11, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+        osc.connect(gain);
+        noise.connect(noiseGain);
+        gain.connect(audio.destination);
+        noiseGain.connect(audio.destination);
+        osc.start(now);
+        noise.start(now);
+        osc.stop(now + 0.22);
+        noise.stop(now + 0.18);
+      }
+
+      function playLifeLostSound() {
+        const audio = wakeAudio();
+
+        if (!audio) {
+          return;
+        }
+
+        const now = audio.currentTime;
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+
+        osc.type = "square";
+        osc.frequency.setValueAtTime(210, now);
+        osc.frequency.exponentialRampToValueAtTime(72, now + 0.32);
+        gain.gain.setValueAtTime(0.13, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+        osc.connect(gain);
+        gain.connect(audio.destination);
+        osc.start(now);
+        osc.stop(now + 0.36);
+      }
+
+      function getDifficulty() {
+        return Math.min(3.2, 1 + state.time * 0.025);
+      }
+
+      function getScrollSpeed() {
+        return 92 + Math.min(96, state.time * 2.2);
+      }
+
+      function ensureTerrainAhead() {
+        let last = state.terrainPoints[state.terrainPoints.length - 1];
+
+        // Extend and retire scrolling terrain chunks as the patrol advances.
+        while (last.x < state.scrollX + WIDTH + 800) {
+          const nextX = last.x + TERRAIN_STEP;
+          const curve = Math.sin(nextX * 0.011) * 11;
+          const nextY = clamp(last.y + curve + randomRange(-28, 26), TERRAIN_MIN, TERRAIN_MAX);
+
+          state.terrainPoints.push({ x: nextX, y: nextY });
+
+          if (Math.random() < 0.075 + getDifficulty() * 0.018) {
+            state.turrets.push(makeTurret(nextX + randomRange(6, TERRAIN_STEP - 12)));
+          }
+
+          last = state.terrainPoints[state.terrainPoints.length - 1];
+        }
+
+        while (
+          state.terrainPoints.length > 3 &&
+          state.terrainPoints[1].x < state.scrollX - TERRAIN_STEP * 2
+        ) {
+          state.terrainPoints.shift();
+        }
+
+        state.turrets = state.turrets.filter((turret) => {
+          return !turret.destroyed && turret.worldX > state.scrollX - 120;
+        });
+      }
+
+      function getTerrainY(screenX) {
+        const worldX = state.scrollX + screenX;
+        const points = state.terrainPoints;
+
+        for (let i = 0; i < points.length - 1; i += 1) {
+          const a = points[i];
+          const b = points[i + 1];
+
+          if (worldX >= a.x && worldX <= b.x) {
+            const t = (worldX - a.x) / (b.x - a.x);
+            return a.y + (b.y - a.y) * t;
+          }
+        }
+
+        return TERRAIN_MAX;
+      }
+
+      function firePlayerBullet() {
+        const player = state.player;
+
+        if (player.cooldown > 0 || state.gameOver) {
+          return;
+        }
+
+        state.bullets.push({
+          x: player.x + player.w - 2,
+          y: player.y + player.h / 2 - 2,
+          w: 14,
+          h: 4,
+          vx: 610
+        });
+        player.cooldown = 0.17;
+        playShootSound();
+      }
+
+      function spawnEnemy() {
+        const difficulty = getDifficulty();
+        const type = Math.random() < 0.45 ? "wave" : "straight";
+        const baseY = randomRange(78, Math.min(310, getTerrainY(WIDTH - 90) - 90));
+
+        state.enemies.push({
+          x: WIDTH + 40,
+          y: baseY,
+          baseY,
+          w: 44,
+          h: 22,
+          type,
+          speed: randomRange(136, 172) + difficulty * 24,
+          waveAmp: randomRange(20, 46),
+          waveSpeed: randomRange(2.2, 3.7),
+          phase: randomRange(0, Math.PI * 2),
+          shootCooldown: randomRange(1.0, 2.5),
+          scoreValue: type === "wave" ? 150 : 100
+        });
+      }
+
+      function spawnEnemyShot(x, y, speed) {
+        const player = state.player;
+        const aimX = player.x + player.w / 2;
+        const aimY = player.y + player.h / 2;
+        const dx = aimX - x;
+        const dy = aimY - y;
+        const distance = Math.max(1, Math.hypot(dx, dy));
+
+        state.enemyShots.push({
+          x,
+          y,
+          w: 12,
+          h: 4,
+          vx: (dx / distance) * speed,
+          vy: (dy / distance) * speed
+        });
+      }
+
+      function makeExplosion(x, y, color, count) {
+        for (let i = 0; i < count; i += 1) {
+          const angle = randomRange(0, Math.PI * 2);
+          const speed = randomRange(45, 210);
+
+          state.particles.push({
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: randomRange(2, 6),
+            life: randomRange(0.28, 0.68),
+            maxLife: 0.68,
+            color
+          });
+        }
+      }
+
+      function loseLife() {
+        const player = state.player;
+
+        if (state.gameOver || player.invincible > 0) {
+          return;
+        }
+
+        state.lives -= 1;
+        playLifeLostSound();
+        makeExplosion(player.x + player.w / 2, player.y + player.h / 2, "#ffffff", 28);
+
+        if (state.lives <= 0) {
+          state.gameOver = true;
+          playExplosionSound();
+          return;
+        }
+
+        state.player = createPlayer();
+      }
+
+      function updateBackground(dt, scrollSpeed) {
+        for (const star of state.stars) {
+          star.x -= (star.speed + scrollSpeed * 0.08) * dt;
+
+          if (star.x < -10) {
+            star.x = WIDTH + randomRange(8, 90);
+            star.y = randomRange(34, 330);
+          }
+        }
+
+        for (const cloud of state.clouds) {
+          cloud.x -= (cloud.speed + scrollSpeed * 0.18) * dt;
+
+          if (cloud.x + cloud.w < -20) {
+            cloud.x = WIDTH + randomRange(80, 260);
+            cloud.y = randomRange(56, 225);
+            cloud.w = randomRange(58, 118);
+          }
+        }
+      }
+
+      function updatePlayer(dt) {
+        const player = state.player;
+        const speed = 270;
+        let dx = 0;
+        let dy = 0;
+
+        if (keys.has("p")) {
+          dy -= 1;
+        }
+
+        if (keys.has("l")) {
+          dy += 1;
+        }
+
+        if (keys.has("n")) {
+          dx -= 1;
+        }
+
+        if (keys.has("m")) {
+          dx += 1;
+        }
+
+        if (dx !== 0 || dy !== 0) {
+          const length = Math.hypot(dx, dy);
+          dx /= length;
+          dy /= length;
+        }
+
+        player.x = clamp(player.x + dx * speed * dt, 18, WIDTH - player.w - 24);
+        player.y = clamp(player.y + dy * speed * dt, 46, HEIGHT - player.h - 8);
+        player.cooldown = Math.max(0, player.cooldown - dt);
+        player.invincible = Math.max(0, player.invincible - dt);
+        player.enginePulse += dt * 18;
+
+        if (keys.has(" ")) {
+          firePlayerBullet();
+        }
+      }
+
+      function updateBullets(dt) {
+        for (const bullet of state.bullets) {
+          bullet.x += bullet.vx * dt;
+        }
+
+        state.bullets = state.bullets.filter((bullet) => {
+          return bullet.x < WIDTH + 40 && bullet.y < getTerrainY(bullet.x);
+        });
+      }
+
+      function updateEnemies(dt) {
+        const difficulty = getDifficulty();
+
+        state.enemySpawnTimer -= dt;
+
+        if (state.enemySpawnTimer <= 0) {
+          spawnEnemy();
+          state.enemySpawnTimer = Math.max(0.46, randomRange(1.15, 1.75) / difficulty);
+        }
+
+        for (const enemy of state.enemies) {
+          enemy.x -= enemy.speed * dt;
+          enemy.shootCooldown -= dt;
+
+          if (enemy.type === "wave") {
+            enemy.y = enemy.baseY + Math.sin(state.time * enemy.waveSpeed + enemy.phase) * enemy.waveAmp;
+          }
+
+          if (enemy.shootCooldown <= 0 && enemy.x > 170 && enemy.x < WIDTH - 40) {
+            spawnEnemyShot(enemy.x, enemy.y + enemy.h / 2, 185 + difficulty * 28);
+            enemy.shootCooldown = randomRange(1.45, 2.6) / difficulty;
+          }
+        }
+
+        state.enemies = state.enemies.filter((enemy) => {
+          return enemy.x + enemy.w > -50 && enemy.y + enemy.h < getTerrainY(enemy.x + enemy.w / 2);
+        });
+      }
+
+      function updateTurrets(dt) {
+        const difficulty = getDifficulty();
+
+        for (const turret of state.turrets) {
+          const x = turret.worldX - state.scrollX;
+
+          if (x < -40 || x > WIDTH + 40) {
+            continue;
+          }
+
+          turret.cooldown -= dt;
+
+          if (turret.cooldown <= 0 && !state.gameOver) {
+            const y = getTerrainY(x) - 24;
+            spawnEnemyShot(x + 12, y, 170 + difficulty * 30);
+            turret.cooldown = randomRange(1.7, 2.8) / difficulty;
+          }
+        }
+      }
+
+      function updateEnemyShots(dt) {
+        for (const shot of state.enemyShots) {
+          shot.x += shot.vx * dt;
+          shot.y += shot.vy * dt;
+        }
+
+        state.enemyShots = state.enemyShots.filter((shot) => {
+          return shot.x > -50 && shot.x < WIDTH + 50 && shot.y > 20 && shot.y < HEIGHT + 40;
+        });
+      }
+
+      function updateParticles(dt) {
+        for (const particle of state.particles) {
+          particle.x += particle.vx * dt;
+          particle.y += particle.vy * dt;
+          particle.vy += 70 * dt;
+          particle.life -= dt;
+        }
+
+        state.particles = state.particles.filter((particle) => particle.life > 0);
+      }
+
+      function checkBulletHits() {
+        // Player shots can destroy aircraft and ground turrets.
+        for (let i = state.bullets.length - 1; i >= 0; i -= 1) {
+          const bullet = state.bullets[i];
+          let removed = false;
+
+          for (let j = state.enemies.length - 1; j >= 0; j -= 1) {
+            const enemy = state.enemies[j];
+
+            if (rectsOverlap(bullet, enemy)) {
+              makeExplosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, "#58ff76", 18);
+              playExplosionSound();
+              state.score += enemy.scoreValue;
+              state.enemies.splice(j, 1);
+              state.bullets.splice(i, 1);
+              removed = true;
+              break;
+            }
+          }
+
+          if (removed) {
+            continue;
+          }
+
+          for (const turret of state.turrets) {
+            const tx = turret.worldX - state.scrollX;
+            const turretRect = {
+              x: tx - 6,
+              y: getTerrainY(tx) - 28,
+              w: 26,
+              h: 28
+            };
+
+            if (!turret.destroyed && rectsOverlap(bullet, turretRect)) {
+              turret.destroyed = true;
+              makeExplosion(tx, turretRect.y + 8, "#d7ffe1", 16);
+              playExplosionSound();
+              state.score += 175;
+              state.bullets.splice(i, 1);
+              break;
+            }
+          }
+        }
+      }
+
+      function checkPlayerHits() {
+        const player = state.player;
+        const playerRect = {
+          x: player.x + 5,
+          y: player.y + 3,
+          w: player.w - 10,
+          h: player.h - 6
+        };
+
+        if (player.invincible <= 0) {
+          for (const enemy of state.enemies) {
+            if (rectsOverlap(playerRect, enemy)) {
+              loseLife();
+              return;
+            }
+          }
+
+          for (const shot of state.enemyShots) {
+            if (rectsOverlap(playerRect, shot)) {
+              loseLife();
+              return;
+            }
+          }
+
+          for (const turret of state.turrets) {
+            const tx = turret.worldX - state.scrollX;
+            const turretRect = {
+              x: tx - 6,
+              y: getTerrainY(tx) - 28,
+              w: 26,
+              h: 28
+            };
+
+            if (!turret.destroyed && rectsOverlap(playerRect, turretRect)) {
+              loseLife();
+              return;
+            }
+          }
+        }
+
+        const leftGround = getTerrainY(playerRect.x);
+        const midGround = getTerrainY(playerRect.x + playerRect.w / 2);
+        const rightGround = getTerrainY(playerRect.x + playerRect.w);
+        const groundY = Math.min(leftGround, midGround, rightGround);
+
+        // Sampling three points keeps terrain collision fair on slopes.
+        if (playerRect.y + playerRect.h > groundY) {
+          loseLife();
+        }
+      }
+
+      function update(dt) {
+        updateMusic();
+
+        if (state.infoOpen) {
+          return;
+        }
+
+        const scrollSpeed = getScrollSpeed();
+
+        updateBackground(dt, scrollSpeed);
+        updateParticles(dt);
+
+        if (state.gameOver) {
+          return;
+        }
+
+        state.time += dt;
+        state.score += dt * 9;
+        state.scrollX += scrollSpeed * dt;
+        ensureTerrainAhead();
+        updatePlayer(dt);
+        updateBullets(dt);
+        updateEnemies(dt);
+        updateTurrets(dt);
+        updateEnemyShots(dt);
+        checkBulletHits();
+        checkPlayerHits();
+      }
+
+      function drawBackground() {
+        ctx.fillStyle = "#020711";
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        ctx.fillStyle = "#d7ffe1";
+        for (const star of state.stars) {
+          ctx.fillRect(Math.round(star.x), Math.round(star.y), star.size, star.size);
+        }
+
+        ctx.fillStyle = "rgba(88, 255, 118, 0.16)";
+        for (const cloud of state.clouds) {
+          const x = Math.round(cloud.x);
+          const y = Math.round(cloud.y);
+          ctx.fillRect(x, y, cloud.w, 6);
+          ctx.fillRect(x + 12, y - 8, cloud.w * 0.45, 6);
+          ctx.fillRect(x + cloud.w * 0.45, y + 8, cloud.w * 0.38, 6);
+        }
+      }
+
+      function drawTerrain() {
+        const points = state.terrainPoints;
+
+        ctx.beginPath();
+        ctx.moveTo(points[0].x - state.scrollX, HEIGHT);
+
+        for (const point of points) {
+          ctx.lineTo(point.x - state.scrollX, point.y);
+        }
+
+        ctx.lineTo(points[points.length - 1].x - state.scrollX, HEIGHT);
+        ctx.closePath();
+        ctx.fillStyle = "#0f451c";
+        ctx.fill();
+
+        ctx.strokeStyle = "#58ff76";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+
+        for (let i = 0; i < points.length; i += 1) {
+          const point = points[i];
+          const x = point.x - state.scrollX;
+
+          if (i === 0) {
+            ctx.moveTo(x, point.y);
+          } else {
+            ctx.lineTo(x, point.y);
+          }
+        }
+
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(215, 255, 225, 0.12)";
+        for (let x = -40; x < WIDTH + 60; x += TERRAIN_STEP) {
+          const y = getTerrainY(x);
+          ctx.fillRect(x, y + 18, 32, 5);
+          ctx.fillRect(x + 12, y + 42, 44, 5);
+        }
+      }
+
+      function drawTurrets() {
+        for (const turret of state.turrets) {
+          const x = turret.worldX - state.scrollX;
+
+          if (x < -40 || x > WIDTH + 40 || turret.destroyed) {
+            continue;
+          }
+
+          const y = getTerrainY(x);
+          ctx.fillStyle = "#d7ffe1";
+          ctx.fillRect(x - 10, y - 15, 26, 15);
+          ctx.fillStyle = "#58ff76";
+          ctx.fillRect(x - 4, y - 28, 12, 15);
+          ctx.fillRect(x + 3, y - 34, 5, 12);
+        }
+      }
+
+      function drawPlayer() {
+        const player = state.player;
+        const flicker = player.invincible > 0 && Math.floor(state.time * 16) % 2 === 0;
+
+        const x = Math.round(player.x);
+        const y = Math.round(player.y);
+        const flame = Math.floor(player.enginePulse) % 2 === 0 ? 9 : 5;
+
+        ctx.globalAlpha = flicker ? 0.42 : 1;
+        ctx.fillStyle = "#58ff76";
+        ctx.fillRect(x + 8, y + 8, 30, 7);
+        ctx.fillRect(x + 26, y + 3, 12, 17);
+        ctx.fillRect(x + 14, y, 13, 7);
+        ctx.fillRect(x + 13, y + 16, 16, 7);
+        ctx.fillStyle = "#d7ffe1";
+        ctx.fillRect(x + 38, y + 10, 8, 3);
+        ctx.fillRect(x + 21, y + 6, 8, 4);
+        ctx.fillStyle = "#ffdf5a";
+        ctx.fillRect(x - flame, y + 10, flame, 4);
+        ctx.globalAlpha = 1;
+      }
+
+      function drawEnemy(enemy) {
+        const x = Math.round(enemy.x);
+        const y = Math.round(enemy.y);
+
+        ctx.fillStyle = enemy.type === "wave" ? "#d7ffe1" : "#58ff76";
+        ctx.fillRect(x + 4, y + 8, 31, 7);
+        ctx.fillRect(x + 10, y + 2, 14, 8);
+        ctx.fillRect(x + 14, y + 15, 18, 7);
+        ctx.fillStyle = "#020711";
+        ctx.fillRect(x + 6, y + 10, 6, 3);
+        ctx.fillStyle = "#ffdf5a";
+        ctx.fillRect(x + 36, y + 9, 8, 4);
+      }
+
+      function drawBullets() {
+        ctx.fillStyle = "#d7ffe1";
+        for (const bullet of state.bullets) {
+          ctx.fillRect(bullet.x, bullet.y, bullet.w, bullet.h);
+          ctx.fillRect(bullet.x - 8, bullet.y + 1, 5, 2);
+        }
+
+        ctx.fillStyle = "#ffdf5a";
+        for (const shot of state.enemyShots) {
+          ctx.fillRect(shot.x, shot.y, shot.w, shot.h);
+          ctx.fillRect(shot.x + shot.w + 4, shot.y + 1, 6, 2);
+        }
+      }
+
+      function drawParticles() {
+        for (const particle of state.particles) {
+          const alpha = clamp(particle.life / particle.maxLife, 0, 1);
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = particle.color;
+          ctx.fillRect(particle.x, particle.y, particle.size, particle.size);
+        }
+
+        ctx.globalAlpha = 1;
+      }
+
+      function drawHud() {
+        ctx.fillStyle = "rgba(2, 7, 17, 0.88)";
+        ctx.fillRect(0, 0, WIDTH, 38);
+        ctx.fillStyle = "#58ff76";
+        ctx.font = "900 22px Courier New, monospace";
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "left";
+        ctx.fillText("SCORE " + Math.floor(state.score).toString().padStart(6, "0"), 18, 21);
+        ctx.textAlign = "right";
+        ctx.fillText("LIVES " + state.lives, WIDTH - 18, 21);
+      }
+
+      function drawGameOver() {
+        if (!state.gameOver) {
+          return;
+        }
+
+        ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        ctx.fillStyle = "#58ff76";
+        ctx.font = "900 72px Courier New, monospace";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("GAME OVER", WIDTH / 2, HEIGHT / 2 - 28);
+        ctx.font = "900 28px Courier New, monospace";
+        ctx.fillText("PRESS R TO RESTART", WIDTH / 2, HEIGHT / 2 + 42);
+      }
+
+      function draw() {
+        drawBackground();
+        drawTerrain();
+        drawTurrets();
+
+        for (const enemy of state.enemies) {
+          drawEnemy(enemy);
+        }
+
+        drawBullets();
+        drawPlayer();
+        drawParticles();
+        drawHud();
+        drawGameOver();
+      }
+
+      function loop(timestamp) {
+        const dt = Math.min(0.033, (timestamp - state.lastTime) / 1000 || 0);
+        state.lastTime = timestamp;
+        update(dt);
+        draw();
+        requestAnimationFrame(loop);
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+
+      window.addEventListener("keydown", (event) => {
+        const key = event.key.toLowerCase();
+
+        if (key === "i") {
+          event.preventDefault();
+          setInfoOpen(!state.infoOpen);
+          keys.clear();
+          return;
+        }
+
+        if (state.infoOpen) {
+          event.preventDefault();
+          return;
+        }
+
+        if (["p", "l", "n", "m"].includes(key) || event.code === "Space") {
+          event.preventDefault();
+          wakeAudio();
+        }
+
+        if (event.code === "Space") {
+          keys.add(" ");
+          return;
+        }
+
+        if (key === "r" && state.gameOver) {
+          event.preventDefault();
+          state = createGameState();
+          setInfoOpen(false);
+          return;
+        }
+
+        if (["p", "l", "n", "m"].includes(key)) {
+          keys.add(key);
+        }
+      });
+
+      window.addEventListener("keyup", (event) => {
+        const key = event.key.toLowerCase();
+
+        if (event.code === "Space") {
+          keys.delete(" ");
+          return;
+        }
+
+        keys.delete(key);
+      });
+
+      resizeCanvas();
+      requestAnimationFrame(loop);
+    })();
+  </script>
+
+
+</body></html>

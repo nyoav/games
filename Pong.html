@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<!-- saved from url=(0127)file:///Users/yoavnamir/Documents/Codex/2026-06-19/game-studio-plugin-game-studio-openai-2/outputs/black-white-tennis-pong.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Black &amp; White Tennis Pong</title>
+  <style>
+    :root {
+      --bg: #000;
+      --fg: #fff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Courier New", Courier, monospace;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+    }
+
+    .game-shell {
+      position: relative;
+      width: min(96vw, 1100px);
+      aspect-ratio: 16 / 9;
+      max-height: 92vh;
+      border: 4px solid var(--fg);
+      background: var(--bg);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      background: var(--bg);
+    }
+
+    .scoreboard {
+      position: absolute;
+      top: clamp(14px, 3vw, 32px);
+      left: 0;
+      right: 0;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      color: var(--fg);
+      font-size: clamp(34px, 8vw, 92px);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      text-shadow:
+        4px 0 0 var(--bg),
+        -4px 0 0 var(--bg),
+        0 4px 0 var(--bg),
+        0 -4px 0 var(--bg);
+    }
+
+    .title {
+      position: absolute;
+      bottom: clamp(14px, 2.8vw, 26px);
+      left: 0;
+      right: 0;
+      z-index: 2;
+      pointer-events: none;
+      text-align: center;
+      color: var(--fg);
+      font-size: clamp(12px, 2.2vw, 22px);
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .status {
+      position: absolute;
+      top: clamp(8px, 1.8vw, 18px);
+      left: clamp(10px, 2vw, 22px);
+      right: clamp(10px, 2vw, 22px);
+      z-index: 2;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      pointer-events: none;
+      color: var(--fg);
+      font-size: clamp(10px, 1.6vw, 17px);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      text-shadow:
+        3px 0 0 var(--bg),
+        -3px 0 0 var(--bg),
+        0 3px 0 var(--bg),
+        0 -3px 0 var(--bg);
+    }
+
+    .info-screen {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      display: grid;
+      place-items: center;
+      padding: clamp(18px, 4vw, 44px);
+      pointer-events: none;
+      color: var(--fg);
+      background: rgba(0, 0, 0, 0.86);
+      opacity: 0;
+      transition: opacity 120ms linear;
+    }
+
+    .info-screen.is-visible {
+      opacity: 1;
+    }
+
+    .info-panel {
+      width: min(760px, 100%);
+      border: 4px solid var(--fg);
+      padding: clamp(16px, 3.5vw, 30px);
+      background: var(--bg);
+      text-align: left;
+      text-transform: uppercase;
+      box-shadow: 0 0 0 4px var(--bg);
+    }
+
+    .info-panel h2 {
+      margin: 0 0 18px;
+      font-size: clamp(28px, 5vw, 56px);
+      line-height: 1;
+      letter-spacing: 0;
+      text-align: center;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px clamp(18px, 4vw, 40px);
+      font-size: clamp(13px, 2vw, 22px);
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .info-grid h3 {
+      margin: 0 0 8px;
+      font-size: clamp(16px, 2.5vw, 26px);
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .info-grid p {
+      margin: 4px 0;
+    }
+
+    .info-close {
+      margin-top: 22px;
+      text-align: center;
+      font-size: clamp(13px, 2vw, 22px);
+      font-weight: 900;
+    }
+
+    .message {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      pointer-events: none;
+      color: var(--fg);
+      text-align: center;
+      text-transform: uppercase;
+      background: rgba(0, 0, 0, 0.72);
+      opacity: 0;
+      transition: opacity 140ms linear;
+    }
+
+    .message.is-visible {
+      opacity: 1;
+    }
+
+    .message-text {
+      max-width: 860px;
+      font-size: clamp(28px, 7vw, 82px);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .message-subtext {
+      margin-top: 18px;
+      font-size: clamp(14px, 2.2vw, 24px);
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 680px) {
+      .game-shell {
+        width: 100vw;
+        max-height: 100vh;
+        border-left: 0;
+        border-right: 0;
+      }
+
+      .title {
+        bottom: 10px;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="game-shell" aria-label="Black &amp; White Tennis Pong game">
+    <canvas id="court" aria-hidden="true" width="1092" height="611"></canvas>
+    <div class="status">
+      <span id="modeLabel">Vs Computer - C toggles</span>
+      <span>I Controls</span>
+      <span id="soundLabel">Music On - M</span>
+    </div>
+    <div class="scoreboard" id="scoreboard">0 - Game</div>
+    <div class="title">Black &amp; White Tennis Pong</div>
+    <section class="message is-visible" id="message" aria-live="polite">
+      <div>
+        <div class="message-text" id="messageText">Right Player Wins</div>
+        <div class="message-subtext">Space restart | C mode | M music</div>
+      </div>
+    </section>
+    <section class="info-screen" id="infoScreen" aria-live="polite">
+      <div class="info-panel">
+        <h2>Controls</h2>
+        <div class="info-grid">
+          <div>
+            <h3>Human Player</h3>
+            <p>Q = Move Up</p>
+            <p>A = Move Down</p>
+          </div>
+          <div>
+            <h3>Two Players</h3>
+            <p>Right P = Move Up</p>
+            <p>Right L = Move Down</p>
+          </div>
+          <div>
+            <h3>Game</h3>
+            <p>Space = Restart</p>
+            <p>C = Computer / 2 Players</p>
+          </div>
+          <div>
+            <h3>Sound &amp; Help</h3>
+            <p>M = Music On / Off</p>
+            <p>I = Show / Hide Controls</p>
+          </div>
+        </div>
+        <div class="info-close">Press I to return</div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const canvas = document.getElementById("court");
+      const ctx = canvas.getContext("2d");
+      const scoreboard = document.getElementById("scoreboard");
+      const message = document.getElementById("message");
+      const messageText = document.getElementById("messageText");
+      const modeLabel = document.getElementById("modeLabel");
+      const soundLabel = document.getElementById("soundLabel");
+      const infoScreen = document.getElementById("infoScreen");
+
+      // The game runs in these logical court units, then scales to fit the page.
+      const COURT_WIDTH = 960;
+      const COURT_HEIGHT = 540;
+      const PADDLE_HEIGHT = 112;
+      const PADDLE_WIDTH = 8;
+      const PADDLE_SPEED = 520;
+      const BALL_SIZE = 12;
+      const BALL_START_SPEED = 310;
+      const BALL_SPEED_GAIN = 1.055;
+      const BALL_MAX_SPEED = 780;
+      const COMPUTER_SPEED = 455;
+      const COMPUTER_DEAD_ZONE = 12;
+      const SCORE_LABELS = ["0", "15", "30", "45", "Game"];
+      const MUSIC_LEAD = [523, 659, 784, null, 698, 659, 523, null, 392, 523, 659, 698, 659, null, 523, null];
+      const MUSIC_BASS = [131, null, 196, null, 165, null, 196, null];
+
+      const keys = new Set();
+      let lastTime = 0;
+      let audioContext = null;
+      let musicStarted = false;
+      let musicMuted = false;
+      let nextMusicTime = 0;
+      let musicStep = 0;
+
+      const state = {
+        leftScore: 0,
+        rightScore: 0,
+        winner: null,
+        mode: "computer",
+        infoOpen: false,
+        leftPaddle: {
+          x: 42,
+          y: COURT_HEIGHT / 2 - PADDLE_HEIGHT / 2
+        },
+        rightPaddle: {
+          x: COURT_WIDTH - 42 - PADDLE_WIDTH,
+          y: COURT_HEIGHT / 2 - PADDLE_HEIGHT / 2
+        },
+        ball: {
+          x: COURT_WIDTH / 2 - BALL_SIZE / 2,
+          y: COURT_HEIGHT / 2 - BALL_SIZE / 2,
+          vx: BALL_START_SPEED,
+          vy: BALL_START_SPEED * 0.35,
+          speed: BALL_START_SPEED
+        }
+      };
+
+      function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+
+        canvas.width = Math.round(rect.width * dpr);
+        canvas.height = Math.round(rect.height * dpr);
+
+        ctx.setTransform(
+          canvas.width / COURT_WIDTH,
+          0,
+          0,
+          canvas.height / COURT_HEIGHT,
+          0,
+          0
+        );
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function updateScoreboard() {
+        scoreboard.textContent =
+          SCORE_LABELS[state.leftScore] + " - " + SCORE_LABELS[state.rightScore];
+      }
+
+      function updateLabels() {
+        modeLabel.textContent = state.mode === "computer" ? "Vs Computer - C toggles" : "2 Players - C toggles";
+        soundLabel.textContent = musicMuted ? "Music Off - M" : "Music On - M";
+      }
+
+      function setInfoOpen(isOpen) {
+        state.infoOpen = isOpen;
+        infoScreen.classList.toggle("is-visible", state.infoOpen);
+      }
+
+      function setMessage(text) {
+        messageText.textContent = text;
+        message.classList.toggle("is-visible", Boolean(text));
+      }
+
+      function getAudioContext() {
+        const AudioCtor = window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioCtor) {
+          return null;
+        }
+
+        if (!audioContext) {
+          audioContext = new AudioCtor();
+        }
+
+        if (audioContext.state === "suspended") {
+          audioContext.resume();
+        }
+
+        return audioContext;
+      }
+
+      function startMusic() {
+        const audio = getAudioContext();
+
+        if (!audio || musicStarted) {
+          return;
+        }
+
+        musicStarted = true;
+        nextMusicTime = audio.currentTime;
+        musicStep = 0;
+      }
+
+      function scheduleTone(frequency, start, duration, volume, type) {
+        const audio = getAudioContext();
+
+        if (!audio || musicMuted || !frequency) {
+          return;
+        }
+
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(volume, start + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+        oscillator.start(start);
+        oscillator.stop(start + duration + 0.03);
+      }
+
+      function updateMusic() {
+        if (!musicStarted || !audioContext || audioContext.state !== "running" || musicMuted) {
+          return;
+        }
+
+        const stepDuration = 0.18;
+
+        while (nextMusicTime < audioContext.currentTime + 0.12) {
+          const lead = MUSIC_LEAD[musicStep % MUSIC_LEAD.length];
+          const bass = MUSIC_BASS[musicStep % MUSIC_BASS.length];
+
+          scheduleTone(lead, nextMusicTime, 0.08, 0.035, "square");
+          scheduleTone(bass, nextMusicTime, 0.12, 0.026, "triangle");
+
+          if (musicStep % 4 === 2 && lead) {
+            scheduleTone(lead * 1.5, nextMusicTime + 0.055, 0.045, 0.018, "square");
+          }
+
+          musicStep += 1;
+          nextMusicTime += stepDuration;
+        }
+      }
+
+      function resetPaddles() {
+        state.leftPaddle.y = COURT_HEIGHT / 2 - PADDLE_HEIGHT / 2;
+        state.rightPaddle.y = COURT_HEIGHT / 2 - PADDLE_HEIGHT / 2;
+      }
+
+      function resetBall(direction) {
+        const angle = (Math.random() * 0.64 - 0.32) * Math.PI;
+        state.ball.x = COURT_WIDTH / 2 - BALL_SIZE / 2;
+        state.ball.y = COURT_HEIGHT / 2 - BALL_SIZE / 2;
+        state.ball.speed = BALL_START_SPEED;
+        state.ball.vx = Math.cos(angle) * BALL_START_SPEED * direction;
+        state.ball.vy = Math.sin(angle) * BALL_START_SPEED;
+      }
+
+      function restartGame() {
+        state.leftScore = 0;
+        state.rightScore = 0;
+        state.winner = null;
+        resetPaddles();
+        resetBall(Math.random() < 0.5 ? -1 : 1);
+        updateScoreboard();
+        updateLabels();
+        setMessage("");
+      }
+
+      function scorePoint(side) {
+        if (side === "left") {
+          state.leftScore += 1;
+        } else {
+          state.rightScore += 1;
+        }
+
+        updateScoreboard();
+
+        if (state.leftScore >= SCORE_LABELS.length - 1) {
+          state.winner = "left";
+          setMessage("Left Player Wins");
+          return;
+        }
+
+        if (state.rightScore >= SCORE_LABELS.length - 1) {
+          state.winner = "right";
+          setMessage("Right Player Wins");
+          return;
+        }
+
+        resetPaddles();
+
+        // Launch toward the player who lost the point.
+        resetBall(side === "left" ? 1 : -1);
+      }
+
+      function moveComputerPaddle(dt) {
+        const paddleCenter = state.rightPaddle.y + PADDLE_HEIGHT / 2;
+        const ballCenter = state.ball.y + BALL_SIZE / 2;
+        const ballMovingTowardComputer = state.ball.vx > 0;
+        const target = ballMovingTowardComputer
+          ? ballCenter + Math.sin(state.ball.x * 0.018) * 18
+          : COURT_HEIGHT / 2;
+        const delta = target - paddleCenter;
+
+        if (Math.abs(delta) > COMPUTER_DEAD_ZONE) {
+          state.rightPaddle.y += Math.sign(delta) * COMPUTER_SPEED * dt;
+        }
+      }
+
+      function movePaddles(dt) {
+        if (keys.has("q")) {
+          state.leftPaddle.y -= PADDLE_SPEED * dt;
+        }
+
+        if (keys.has("a")) {
+          state.leftPaddle.y += PADDLE_SPEED * dt;
+        }
+
+        if (state.mode === "computer") {
+          moveComputerPaddle(dt);
+        } else {
+          if (keys.has("p")) {
+            state.rightPaddle.y -= PADDLE_SPEED * dt;
+          }
+
+          if (keys.has("l")) {
+            state.rightPaddle.y += PADDLE_SPEED * dt;
+          }
+        }
+
+        state.leftPaddle.y = clamp(
+          state.leftPaddle.y,
+          0,
+          COURT_HEIGHT - PADDLE_HEIGHT
+        );
+        state.rightPaddle.y = clamp(
+          state.rightPaddle.y,
+          0,
+          COURT_HEIGHT - PADDLE_HEIGHT
+        );
+      }
+
+      function rectanglesOverlap(a, b) {
+        return (
+          a.x < b.x + b.width &&
+          a.x + a.width > b.x &&
+          a.y < b.y + b.height &&
+          a.y + a.height > b.y
+        );
+      }
+
+      function bounceOffPaddle(paddle, direction) {
+        const paddleCenter = paddle.y + PADDLE_HEIGHT / 2;
+        const ballCenter = state.ball.y + BALL_SIZE / 2;
+        const hitOffset = (ballCenter - paddleCenter) / (PADDLE_HEIGHT / 2);
+        const clampedOffset = clamp(hitOffset, -0.92, 0.92);
+        const nextSpeed = Math.min(state.ball.speed * BALL_SPEED_GAIN, BALL_MAX_SPEED);
+
+        state.ball.speed = nextSpeed;
+        state.ball.vx = Math.abs(Math.cos(clampedOffset * 0.82)) * nextSpeed * direction;
+        state.ball.vy = Math.sin(clampedOffset * 0.82) * nextSpeed;
+
+        if (direction > 0) {
+          state.ball.x = paddle.x + PADDLE_WIDTH;
+        } else {
+          state.ball.x = paddle.x - BALL_SIZE;
+        }
+      }
+
+      function updateBall(dt) {
+        state.ball.x += state.ball.vx * dt;
+        state.ball.y += state.ball.vy * dt;
+
+        if (state.ball.y <= 0) {
+          state.ball.y = 0;
+          state.ball.vy = Math.abs(state.ball.vy);
+        }
+
+        if (state.ball.y + BALL_SIZE >= COURT_HEIGHT) {
+          state.ball.y = COURT_HEIGHT - BALL_SIZE;
+          state.ball.vy = -Math.abs(state.ball.vy);
+        }
+
+        const ballRect = {
+          x: state.ball.x,
+          y: state.ball.y,
+          width: BALL_SIZE,
+          height: BALL_SIZE
+        };
+
+        const leftRect = {
+          x: state.leftPaddle.x,
+          y: state.leftPaddle.y,
+          width: PADDLE_WIDTH,
+          height: PADDLE_HEIGHT
+        };
+
+        const rightRect = {
+          x: state.rightPaddle.x,
+          y: state.rightPaddle.y,
+          width: PADDLE_WIDTH,
+          height: PADDLE_HEIGHT
+        };
+
+        if (state.ball.vx < 0 && rectanglesOverlap(ballRect, leftRect)) {
+          bounceOffPaddle(state.leftPaddle, 1);
+        }
+
+        if (state.ball.vx > 0 && rectanglesOverlap(ballRect, rightRect)) {
+          bounceOffPaddle(state.rightPaddle, -1);
+        }
+
+        if (state.ball.x + BALL_SIZE < 0) {
+          scorePoint("right");
+        }
+
+        if (state.ball.x > COURT_WIDTH) {
+          scorePoint("left");
+        }
+      }
+
+      function update(dt) {
+        updateMusic();
+
+        if (state.infoOpen) {
+          return;
+        }
+
+        movePaddles(dt);
+
+        if (!state.winner) {
+          updateBall(dt);
+        }
+      }
+
+      function drawCenterLine() {
+        ctx.fillStyle = "#fff";
+        const dashHeight = 22;
+        const dashGap = 17;
+        const dashWidth = 6;
+        const x = COURT_WIDTH / 2 - dashWidth / 2;
+
+        for (let y = 14; y < COURT_HEIGHT; y += dashHeight + dashGap) {
+          ctx.fillRect(x, y, dashWidth, dashHeight);
+        }
+      }
+
+      function drawCourt() {
+        ctx.clearRect(0, 0, COURT_WIDTH, COURT_HEIGHT);
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, COURT_WIDTH, COURT_HEIGHT);
+
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, COURT_WIDTH, 4);
+        ctx.fillRect(0, COURT_HEIGHT - 4, COURT_WIDTH, 4);
+        drawCenterLine();
+      }
+
+      function drawPaddles() {
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(
+          state.leftPaddle.x,
+          state.leftPaddle.y,
+          PADDLE_WIDTH,
+          PADDLE_HEIGHT
+        );
+        ctx.fillRect(
+          state.rightPaddle.x,
+          state.rightPaddle.y,
+          PADDLE_WIDTH,
+          PADDLE_HEIGHT
+        );
+      }
+
+      function drawBall() {
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(state.ball.x, state.ball.y, BALL_SIZE, BALL_SIZE);
+      }
+
+      function draw() {
+        drawCourt();
+        drawPaddles();
+        drawBall();
+      }
+
+      function loop(timestamp) {
+        const dt = Math.min(0.033, (timestamp - lastTime) / 1000 || 0);
+        lastTime = timestamp;
+
+        update(dt);
+        draw();
+        requestAnimationFrame(loop);
+      }
+
+      window.addEventListener("resize", resizeCanvas);
+
+      window.addEventListener("keydown", (event) => {
+        const key = event.key.toLowerCase();
+        startMusic();
+
+        if (key === " ") {
+          event.preventDefault();
+          restartGame();
+          return;
+        }
+
+        if (key === "i") {
+          event.preventDefault();
+          setInfoOpen(!state.infoOpen);
+          keys.clear();
+          return;
+        }
+
+        if (key === "c") {
+          event.preventDefault();
+          state.mode = state.mode === "computer" ? "two-player" : "computer";
+          restartGame();
+          return;
+        }
+
+        if (key === "m") {
+          event.preventDefault();
+          musicMuted = !musicMuted;
+          if (!musicMuted && audioContext) {
+            nextMusicTime = audioContext.currentTime;
+          }
+          updateLabels();
+          return;
+        }
+
+        if (["q", "a", "p", "l"].includes(key)) {
+          event.preventDefault();
+          keys.add(key);
+        }
+      });
+
+      window.addEventListener("keyup", (event) => {
+        keys.delete(event.key.toLowerCase());
+      });
+
+      resizeCanvas();
+      restartGame();
+      updateLabels();
+      requestAnimationFrame(loop);
+    })();
+  </script>
+
+
+</body></html>
