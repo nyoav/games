@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<!-- saved from url=(0067)file:///Users/yoavnamir/Downloads/keynote-b96-flashcards/index.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KEYNOTE-B96 Flashcards</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172026;
+      --muted: #66727c;
+      --line: #d9e0e4;
+      --panel: #ffffff;
+      --surface: #f6f8f7;
+      --teal: #087f7a;
+      --teal-strong: #05635f;
+      --amber: #b87700;
+      --rose: #c54d57;
+      --green: #348452;
+      --blue: #2f6faa;
+      --shadow: 0 18px 44px rgba(25, 43, 49, .12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--surface);
+      color: var(--ink);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        linear-gradient(135deg, rgba(8, 127, 122, .08), rgba(197, 77, 87, .04) 44%, rgba(184, 119, 0, .07)),
+        var(--surface);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+      min-width: 0;
+    }
+
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(255, 255, 255, .78);
+      backdrop-filter: blur(12px);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-height: 100vh;
+    }
+
+    main {
+      min-width: 0;
+      padding: 28px;
+      display: grid;
+      gap: 22px;
+      align-content: start;
+    }
+
+    .brand {
+      display: grid;
+      gap: 12px;
+    }
+
+    .mark {
+      width: 54px;
+      height: 54px;
+      border-radius: 8px;
+      background: #eef7f6;
+      display: grid;
+      place-items: center;
+      border: 1px solid #bdd8d4;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      line-height: 1.2;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: .95rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 74px;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 1.35rem;
+      line-height: 1.1;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: .82rem;
+      margin-top: 4px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label {
+      font-size: .8rem;
+      font-weight: 700;
+      color: #334048;
+    }
+
+    .searchbox,
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      color: var(--ink);
+      padding: 11px 12px;
+      min-height: 44px;
+      outline: none;
+    }
+
+    .searchbox:focus,
+    select:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(8, 127, 122, .15);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .segmented button,
+    .category-list button {
+      min-height: 40px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #2a363d;
+      font-weight: 700;
+      padding: 9px 10px;
+      text-align: left;
+    }
+
+    .segmented button[aria-pressed="true"],
+    .category-list button[aria-pressed="true"] {
+      border-color: var(--teal);
+      background: #e8f4f2;
+      color: var(--teal-strong);
+    }
+
+    .category-list {
+      display: grid;
+      gap: 8px;
+      max-height: 310px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+
+    .category-list button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .category-list span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .category-list small {
+      color: var(--muted);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      min-width: 0;
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .icon-button,
+    .action-button {
+      min-height: 42px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 12px;
+      font-weight: 800;
+    }
+
+    .icon-button {
+      width: 42px;
+      padding: 0;
+    }
+
+    .icon-button[aria-pressed="true"] {
+      border-color: var(--amber);
+      color: var(--amber);
+      background: #fff8ea;
+    }
+
+    .action-button.primary {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+
+    .action-button.danger {
+      color: var(--rose);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+      gap: 22px;
+      align-items: start;
+      min-width: 0;
+    }
+
+    .study-area {
+      min-width: 0;
+      display: grid;
+      gap: 14px;
+    }
+
+    .progress-track {
+      height: 10px;
+      border-radius: 999px;
+      background: #dfe6e7;
+      overflow: hidden;
+      border: 1px solid #cbd6d7;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--teal), var(--green));
+      transition: width .2s ease;
+    }
+
+    .flashcard {
+      min-height: 430px;
+      perspective: 1200px;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .card-shell {
+      min-height: 430px;
+      width: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform .36s ease;
+      min-width: 0;
+    }
+
+    .flashcard.flipped .card-shell {
+      transform: rotateY(180deg);
+    }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: clamp(20px, 4vw, 42px);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 22px;
+      overflow: hidden;
+    }
+
+    .face.back {
+      transform: rotateY(180deg);
+      background: linear-gradient(180deg, #ffffff, #f7fbfa);
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: .84rem;
+      font-weight: 800;
+    }
+
+    .tag {
+      border: 1px solid #cbdedc;
+      background: #edf7f6;
+      color: var(--teal-strong);
+      padding: 6px 9px;
+      border-radius: 8px;
+      font-size: .78rem;
+      max-width: 72%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .prompt {
+      align-self: center;
+      font-size: clamp(1.35rem, 3.3vw, 2.55rem);
+      line-height: 1.18;
+      font-weight: 850;
+      overflow-wrap: anywhere;
+    }
+
+    .answer {
+      align-self: center;
+      font-size: clamp(1.15rem, 2.3vw, 1.9rem);
+      line-height: 1.28;
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: .88rem;
+      font-weight: 700;
+    }
+
+    .confidence {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .confidence button {
+      min-height: 48px;
+      border-radius: 8px;
+      font-weight: 850;
+      color: #fff;
+    }
+
+    .confidence button:nth-child(1) {
+      background: var(--rose);
+    }
+
+    .confidence button:nth-child(2) {
+      background: var(--amber);
+    }
+
+    .confidence button:nth-child(3) {
+      background: var(--green);
+    }
+
+    .side-panel {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .panel-block {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .88);
+      border-radius: 8px;
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .panel-block h2 {
+      margin: 0;
+      font-size: .95rem;
+    }
+
+    .mini-chart {
+      width: 100%;
+      aspect-ratio: 5 / 3;
+      border: 1px solid #d8e1e2;
+      border-radius: 8px;
+      background: #fbfdfc;
+    }
+
+    .review-list {
+      display: grid;
+      gap: 8px;
+      max-height: 360px;
+      overflow: auto;
+    }
+
+    .review-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px;
+      display: grid;
+      gap: 5px;
+      text-align: left;
+      color: var(--ink);
+    }
+
+    .review-item b {
+      font-size: .86rem;
+      line-height: 1.25;
+    }
+
+    .review-item span {
+      color: var(--muted);
+      font-size: .78rem;
+      line-height: 1.25;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.45;
+    }
+
+    svg {
+      display: block;
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      main {
+        order: 1;
+      }
+
+      .sidebar {
+        order: 2;
+        min-width: 0;
+        min-height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .workspace {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 620px) {
+      .sidebar,
+      main {
+        padding: 16px;
+      }
+
+      .stats-grid,
+      .segmented,
+      .confidence {
+        grid-template-columns: 1fr;
+      }
+
+      .toolbar {
+        align-items: stretch;
+      }
+
+      .toolbar-group,
+      .action-button.primary {
+        width: 100%;
+      }
+
+      .toolbar-group {
+        justify-content: space-between;
+        display: grid;
+        grid-template-columns: repeat(4, 42px);
+      }
+
+      .flashcard,
+      .card-shell {
+        min-height: 470px;
+      }
+
+      .face {
+        padding: 20px;
+      }
+
+      .tag {
+        max-width: 62%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <section class="brand">
+        <div class="mark" aria-hidden="true">
+          <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+            <path d="M6 27.5C10.5 25.4 12.3 20.3 15.8 18.2C18.4 16.6 21.1 17.2 23.6 19.6C26.1 22.1 28.1 25.7 32 25.8" stroke="#087f7a" stroke-width="3" stroke-linecap="round"></path>
+            <path d="M6 12.5H32" stroke="#c54d57" stroke-width="3" stroke-linecap="round"></path>
+            <path d="M9 8.5V29.5M29 8.5V29.5" stroke="#172026" stroke-width="2" stroke-linecap="round" opacity=".65"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>KEYNOTE-B96 Recall Cards</h1>
+          <p>ENGOT-ov65 trial deck for platinum-resistant ovarian cancer.</p>
+        </div>
+      </section>
+
+      <section class="stats-grid" aria-label="Deck statistics">
+        <div class="stat"><b id="stat-total">20</b><span>Cards in view</span></div>
+        <div class="stat"><b id="stat-mastered">0</b><span>Marked good</span></div>
+        <div class="stat"><b id="stat-review">0</b><span>Need review</span></div>
+        <div class="stat"><b id="stat-bookmarked">0</b><span>Bookmarked</span></div>
+      </section>
+
+      <section class="field">
+        <label for="search">Search</label>
+        <input class="searchbox" id="search" type="search" placeholder="PFS, bevacizumab, CPS...">
+      </section>
+
+      <section class="field">
+        <label>Mode</label>
+        <div class="segmented" id="modeGroup">
+          <button type="button" data-mode="all" aria-pressed="true">All cards</button>
+          <button type="button" data-mode="review" aria-pressed="false">Review</button>
+          <button type="button" data-mode="bookmarked" aria-pressed="false">Marked</button>
+          <button type="button" data-mode="unseen" aria-pressed="false">Unseen</button>
+        </div>
+      </section>
+
+      <section class="field">
+        <label>Category</label>
+        <div class="category-list" id="categories">
+        <button type="button" data-category="All" aria-pressed="false">
+          <span>All</span><small>150</small>
+        </button>
+      
+        <button type="button" data-category="Trial Identity and Background" aria-pressed="true">
+          <span>Trial Identity and Background</span><small>20</small>
+        </button>
+      
+        <button type="button" data-category="Patient Eligibility and Baseline Characteristics" aria-pressed="false">
+          <span>Patient Eligibility and Baseline Characteristics</span><small>25</small>
+        </button>
+      
+        <button type="button" data-category="Randomization and Dosing" aria-pressed="false">
+          <span>Randomization and Dosing</span><small>25</small>
+        </button>
+      
+        <button type="button" data-category="Endpoints and Statistical Design" aria-pressed="false">
+          <span>Endpoints and Statistical Design</span><small>20</small>
+        </button>
+      
+        <button type="button" data-category="Efficacy Results (PFS &amp; OS)" aria-pressed="false">
+          <span>Efficacy Results (PFS &amp; OS)</span><small>25</small>
+        </button>
+      
+        <button type="button" data-category="Objective Response and Durability" aria-pressed="false">
+          <span>Objective Response and Durability</span><small>15</small>
+        </button>
+      
+        <button type="button" data-category="Safety and Adverse Events" aria-pressed="false">
+          <span>Safety and Adverse Events</span><small>20</small>
+        </button>
+      </div>
+      </section>
+    </aside>
+
+    <main>
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="icon-button" type="button" id="prev" title="Previous card" aria-label="Previous card">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </button>
+          <button class="icon-button" type="button" id="next" title="Next card" aria-label="Next card">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </button>
+          <button class="icon-button" type="button" id="shuffle" title="Shuffle cards" aria-label="Shuffle cards" aria-pressed="false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 3h5v5M4 20l5.2-5.2M15 15l6 6M21 16v5h-5M4 4l7.2 7.2M15 9l6-6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </button>
+          <button class="icon-button" type="button" id="bookmark" title="Mark card" aria-label="Mark card" aria-pressed="false">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 4.8C6 3.8 6.8 3 7.8 3h8.4C17.2 3 18 3.8 18 4.8V21l-6-3.6L6 21V4.8z" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"></path></svg>
+          </button>
+        </div>
+        <button class="action-button primary" type="button" id="flip">Show answer</button>
+      </div>
+
+      <section class="workspace">
+        <div class="study-area">
+          <div class="progress-track" aria-label="Progress through current card set">
+            <div class="progress-fill" id="progressFill" style="width: 5%;"></div>
+          </div>
+
+          <article class="flashcard" id="flashcard">
+            <div class="card-shell">
+              <div class="face front">
+                <div class="eyebrow">
+                  <span class="tag" id="frontCategory">Trial Identity and Background</span>
+                  <span id="cardIndex">1 / 20</span>
+                </div>
+                <div class="prompt" id="frontText">What is the official identifier for the KEYNOTE-B96 study?</div>
+                <div class="card-footer">
+                  <span id="frontStatus">New</span>
+                  <span>Question</span>
+                </div>
+              </div>
+              <div class="face back">
+                <div class="eyebrow">
+                  <span class="tag" id="backCategory">Trial Identity and Background</span>
+                  <span id="answerIndex">1 / 20</span>
+                </div>
+                <div class="answer" id="backText">ENGOT-ov65/KEYNOTE-B96.</div>
+                <div class="card-footer">
+                  <span id="backStatus">New</span>
+                  <span>Answer</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <div class="confidence" aria-label="Confidence">
+            <button type="button" data-grade="again">Again</button>
+            <button type="button" data-grade="hard">Hard</button>
+            <button type="button" data-grade="good">Good</button>
+          </div>
+        </div>
+
+        <aside class="side-panel" aria-label="Study details">
+          <section class="panel-block">
+            <h2>Trial Signal</h2>
+            <svg class="mini-chart" viewBox="0 0 320 192" role="img" aria-label="Stylized survival curve visual">
+              <rect x="0" y="0" width="320" height="192" fill="#fbfdfc"></rect>
+              <path d="M38 148H286M38 34V148" stroke="#b7c4c6" stroke-width="2"></path>
+              <path d="M45 52H86V73H126V88H169V105H211V123H265" stroke="#087f7a" stroke-width="4" fill="none" stroke-linejoin="round"></path>
+              <path d="M45 61H78V84H113V103H151V119H193V136H265" stroke="#c54d57" stroke-width="4" fill="none" stroke-linejoin="round"></path>
+              <circle cx="226" cy="121" r="5" fill="#087f7a"></circle>
+              <circle cx="215" cy="135" r="5" fill="#c54d57"></circle>
+              <text x="42" y="172" fill="#66727c" font-size="12">PFS / OS recall anchor</text>
+            </svg>
+          </section>
+
+          <section class="panel-block">
+            <h2>Current Queue</h2>
+            <div class="review-list" id="queueList">
+        <button class="review-item" type="button" data-jump="0">
+          <b>What is the official identifier for the KEYNOTE-B96 study?</b>
+          <span>Trial Identity and Background · New</span>
+        </button>
+      
+        <button class="review-item" type="button" data-jump="1">
+          <b>What phase was the KEYNOTE-B96 trial?</b>
+          <span>Trial Identity and Background · New</span>
+        </button>
+      
+        <button class="review-item" type="button" data-jump="2">
+          <b>How many countries participated in the study?</b>
+          <span>Trial Identity and Background · New</span>
+        </button>
+      
+        <button class="review-item" type="button" data-jump="3">
+          <b>How many gynecologic oncology centers were involved?</b>
+          <span>Trial Identity and Background · New</span>
+        </button>
+      
+        <button class="review-item" type="button" data-jump="4">
+          <b>What is the primary clinical problem the study addressed?</b>
+          <span>Trial Identity and Background · New</span>
+        </button>
+      
+        <button class="review-item" type="button" data-jump="5">
+          <b>What was the study's primary objective?</b>
+          <span>Trial Identity and Background · New</span>
+        </button>
+      
+        <button class="review-item" type="button" data-jump="6">
+          <b>What is the global rank of epithelial ovarian cancer in terms of gynaecologic cancer lethality?</b>
+          <span>Trial Identity and Background · New</span>
+        </button>
+      
+        <button class="review-item" type="button" data-jump="7">
+          <b>What keyword defined the population's resistance status?</b>
+          <span>Trial Identity and Background · New</span>
+        </button>
+      
+        <button class="review-item" type="button" data-jump="8">
+          <b>What are the three sources of the cancer investigated?</b>
+          <span>Trial Identity and Background · New</span>
+        </button>
+      
+        <button class="review-item" type="button" data-jump="9">
+          <b>Who funded the KEYNOTE-B96 trial?</b>
+          <span>Trial Identity and Background · New</span>
+        </button>
+      
+        <button class="review-item" type="button" data-jump="10">
+          <b>Which clinical trial database lists this study under NCT05116189?</b>
+          <span>Trial Identity and Background · New</span>
+        </button>
+      
+        <button class="review-item" type="button" data-jump="11">
+          <b>What was the "Seminar route" step 01 in the study overview?</b>
+          <span>Trial Identity and Background · New</span>
+        </button>
+      </div>
+          </section>
+
+          <section class="panel-block">
+            <h2>Controls</h2>
+            <button class="action-button danger" type="button" id="reset">Reset progress</button>
+          </section>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <script type="text/plain" id="deck-source">
+Category 1: Trial Identity and Background
+Front: What is the official identifier for the KEYNOTE-B96 study?
+ Back: ENGOT-ov65/KEYNOTE-B96.
+Front: What phase was the KEYNOTE-B96 trial?
+ Back: Phase 3.
+Front: How many countries participated in the study?
+ Back: 25 countries.
+Front: How many gynecologic oncology centers were involved?
+ Back: 187 centers.
+Front: What is the primary clinical problem the study addressed?
+ Back: Epithelial ovarian cancer frequently recurs and becomes resistant to platinum chemotherapy.
+Front: What was the study's primary objective?
+ Back: To investigate whether adding pembrolizumab to weekly paclitaxel improves progression-free survival (PFS) and overall survival (OS).
+Front: What is the global rank of epithelial ovarian cancer in terms of gynaecologic cancer lethality?
+ Back: It is the most lethal gynaecologic cancer globally.
+Front: What keyword defined the population's resistance status?
+ Back: Platinum-resistant recurrent ovarian cancer.
+Front: What are the three sources of the cancer investigated?
+ Back: Epithelial ovarian, fallopian tube, or primary peritoneal carcinoma.
+Front: Who funded the KEYNOTE-B96 trial?
+ Back: Merck Sharp & Dohme LLC.
+Front: Which clinical trial database lists this study under NCT05116189?
+ Back: ClinicalTrials.gov.
+Front: What was the "Seminar route" step 01 in the study overview?
+ Back: Why platinum resistance changes the treatment question.
+Front: What was the "Seminar route" step 05?
+ Back: How to decide whether this regimen fits a patient now.
+Front: According to "Research in Context," what ORR did pembrolizumab monotherapy show?
+ Back: 8–12%.
+Front: Which two previous phase 3 trials failed to show survival benefit with other ICIs?
+ Back: JAVELIN Ovarian 200 (avelumab) and AGO-OVAR 2.29 (atezolizumab).
+Front: What is the "added value" of this study regarding ICIs?
+ Back: It is the first demonstration of an overall survival benefit with an immune checkpoint inhibitor regimen in ovarian cancer.
+Front: What makes metronomic paclitaxel a good partner for immunotherapy?
+ Back: It can enhance antigen presentation and reduce immunosuppressive cell populations.
+Front: What were the results for bevacizumab in the AURELIA trial?
+ Back: It improved PFS (3.4 to 6.7 months) but not overall survival.
+Front: What recent trial (2025) showed OS benefit with mirvetuximab soravtansine?
+ Back: MIRASOL.
+Front: What was the core message of the KEYNOTE-B96 seminar?
+ Back: Immunotherapy enters the platinum-resistant sequence with a survival benefit.
+Category 2: Patient Eligibility and Baseline Characteristics
+Front: What was the minimum age for participation?
+ Back: 18 years.
+Front: What was the required ECOG performance status?
+ Back: 0 or 1.
+Front: How was platinum resistance defined for eligibility?
+ Back: Radiographic progression or recurrence within 6 months after the last platinum regimen.
+Front: How many prior systemic regimens were allowed?
+ Back: One to two previous systemic regimens.
+Front: What was the specific requirement for the first line of therapy?
+ Back: At least one platinum regimen including four to nine cycles.
+Front: What specific exclusion criterion defined "primary platinum-refractory"?
+ Back: Progression while receiving or within 28 days of the last dose of first-line platinum chemotherapy.
+Front: Were patients required to provide a tumor sample?
+ Back: Yes, an archival or newly obtained tumor tissue sample for PD-L1 assessment.
+Front: What percentage of participants had a PD-L1 CPS $\ge 1$?
+ Back: 72%.
+Front: What histology was most common among participants?
+ Back: High-grade serous carcinoma (86%).
+Front: What percentage of patients had received two prior lines of therapy?
+ Back: 63%.
+Front: What was the median age of participants in the pembrolizumab arm?
+ Back: 62 years.
+Front: What percentage of participants were $\ge 65$ years old?
+ Back: 38%.
+Front: What percentage of patients had prior bevacizumab exposure?
+ Back: 46%.
+Front: What percentage of patients had prior PARP inhibitor exposure?
+ Back: 37%.
+Front: How many patients had prior anti-PD-1 or PD-L1 therapy?
+ Back: 2% (14 participants).
+Front: What percentage of patients had a platinum-free interval (PFI) of $< 3$ months?
+ Back: 46%.
+Front: What percentage of participants had FIGO stage IIIA to IIIC at diagnosis?
+ Back: 57-59%.
+Front: Was the study double-blind or open-label?
+ Back: Double-blind for pembrolizumab/placebo.
+Front: How many participants were randomly assigned in total?
+ Back: 643 female participants.
+Front: How many participants were assigned to the pembrolizumab group?
+ Back: 322.
+Front: How many participants were assigned to the placebo group?
+ Back: 321.
+Front: What was the race of the majority (64-68%) of participants?
+ Back: White.
+Front: What percentage of participants were Asian?
+ Back: 18-22%.
+Front: What percentage of patients had an ECOG score of 0?
+ Back: 55-56%.
+Front: What percentage of participants had carcinosarcoma histology?
+ Back: 1-2%.
+Category 3: Randomization and Dosing
+Front: What was the randomization ratio?
+ Back: 1:1.
+Front: What was the first stratification factor for randomization?
+ Back: Planned use of bevacizumab (Yes vs. No).
+Front: What were the three geographic regions used for stratification?
+ Back: USA vs. EU vs. Rest of the world.
+Front: What was the third stratification factor?
+ Back: PD-L1 Combined Positive Score (CPS).
+Front: What were the three CPS categories for stratification?
+ Back: CPS $<1$, CPS 1 to $<10$, and CPS $\ge 10$.
+Front: What was the block size for randomization?
+ Back: Four.
+Front: What was the dose of pembrolizumab?
+ Back: 400 mg intravenously.
+Front: How often was pembrolizumab/placebo administered?
+ Back: Every 6 weeks.
+Front: What was the maximum number of cycles for pembrolizumab?
+ Back: Up to 18 cycles.
+Front: What was the dose of weekly paclitaxel?
+ Back: 80 mg/m² intravenously.
+Front: What days of each 21-day cycle was paclitaxel given?
+ Back: Days 1, 8, and 15.
+Front: Was bevacizumab required in the study?
+ Back: No, it was permitted based on investigator clinical judgment.
+Front: What was the bevacizumab dose?
+ Back: 10 mg/kg every 2 weeks.
+Front: Could paclitaxel be replaced if a patient had a severe reaction?
+ Back: Yes, with docetaxel 75 mg/m² every 3 weeks.
+Front: Could a patient receive a second course of pembrolizumab?
+ Back: Yes, an additional nine cycles if they progressed after a complete response or completing the first course.
+Front: How often was tumor imaging performed initially?
+ Back: Every 9 weeks through week 54.
+Front: How often was tumor imaging performed after week 54?
+ Back: Every 12 weeks.
+Front: When were adverse events assessed?
+ Back: From randomization through 30 days after stopping treatment (90 days for serious AEs).
+Front: Was crossover between groups permitted?
+ Back: No.
+Front: Who performed the central randomization?
+ Back: An interactive response system.
+Front: What was the planned follow-up duration for overall survival?
+ Back: Until documented death or analysis cutoff.
+Front: What was the cutoff date for the first interim analysis?
+ Back: April 3, 2024.
+Front: What was the cutoff date for the final analysis?
+ Back: September 5, 2025.
+Front: What was the median follow-up at the final analysis?
+ Back: 32.7 months.
+Front: What percentage of patients actually received bevacizumab?
+ Back: 73-74%.
+Category 4: Endpoints and Statistical Design
+Front: What was the primary endpoint of KEYNOTE-B96?
+ Back: Investigator-assessed progression-free survival (PFS) per RECIST v1.1.
+Front: What was the key secondary endpoint?
+ Back: Overall survival (OS).
+Front: What questionnaire assessed patient-reported outcomes (PROs)?
+ Back: EORTC QLQ-C30 and QLQ-OV28.
+Front: What was the alpha level allocated to OS in the overall population?
+ Back: 0.005 initially.
+Front: How was the family-wise type I error rate controlled?
+ Back: The graphical method of Mauer and Bretz.
+Front: What was the "hierarchical testing strategy" order?
+ Back: PFS in CPS $\ge 1$, then PFS overall, then OS in CPS $\ge 1$, then OS overall.
+Front: What analysis population included all randomly assigned participants?
+ Back: Intention-to-treat (ITT) population.
+Front: What analysis population was used for safety?
+ Back: All randomized participants who received at least one dose (as-treated population).
+Front: How were differences in OS assessed statistically?
+ Back: Stratified log-rank test.
+Front: What was used to calculate Hazard Ratios?
+ Back: Stratified Cox proportional hazards model.
+Front: What was the target enrollment for the trial?
+ Back: Approximately 643 participants.
+Front: When was the first interim analysis planned to occur?
+ Back: 9 months after the last participant was randomized.
+Front: What were the two interim analyses testing besides safety?
+ Back: Efficacy (PFS and OS).
+Front: What was the median duration of treatment for the pembrolizumab group?
+ Back: 32.5 weeks.
+Front: What was the median number of pembrolizumab cycles received?
+ Back: Six cycles.
+Front: What percentage of patients completed all study treatment?
+ Back: Less than 1% (7 in pembro, 2 in placebo).
+Front: What was the main reason for treatment discontinuation in both arms?
+ Back: Progressive disease.
+Front: How many participants discontinued treatment due to adverse events in the pembrolizumab arm?
+ Back: 43 (approx. 13%).
+Front: How were immune-mediated AEs identified?
+ Back: Programmatically determined from a predefined list of MedDRA terms.
+Front: Were baseline characteristics formally tested for differences?
+ Back: No, they were summarized descriptively.
+Category 5: Efficacy Results (PFS & OS)
+Front: What was the median PFS for the PD-L1 CPS $\ge 1$ group with pembrolizumab?
+ Back: 8.3 months.
+Front: What was the median PFS for the PD-L1 CPS $\ge 1$ group with placebo?
+ Back: 7.2 months.
+Front: What was the HR for PFS in the PD-L1 CPS $\ge 1$ population?
+ Back: 0.72.
+Front: What was the median PFS for the overall population with pembrolizumab?
+ Back: 8.3 months.
+Front: What was the median PFS for the overall population with placebo?
+ Back: 6.4 months.
+Front: What was the HR for PFS in the overall population?
+ Back: 0.70.
+Front: At which analysis was the PFS hypothesis considered formally rejected?
+ Back: The first interim analysis.
+Front: What was the median OS in the PD-L1 CPS $\ge 1$ population with pembrolizumab?
+ Back: 18.2 months.
+Front: What was the median OS in the PD-L1 CPS $\ge 1$ population with placebo?
+ Back: 14.0 months.
+Front: What was the OS HR in the PD-L1 CPS $\ge 1$ population?
+ Back: 0.76.
+Front: What was the median OS in the overall population with pembrolizumab (final analysis)?
+ Back: 17.7 months.
+Front: What was the median OS in the overall population with placebo?
+ Back: 14.0 months.
+Front: What was the OS HR in the overall population?
+ Back: 0.82.
+Front: In the CPS $< 1$ subgroup, what was the OS Hazard Ratio?
+ Back: 0.98.
+Front: Did older patients ($\ge 65$) benefit from pembrolizumab for OS?
+ Back: Yes, the HR favoured pembrolizumab.
+Front: Did prior PARP inhibitor use negate the survival benefit?
+ Back: No, OS HRs favored pembrolizumab regardless of prior PARP use.
+Front: What was the OS HR for patients with a PFI of $< 3$ months in the CPS $\ge 1$ group?
+ Back: 0.64.
+Front: Was bevacizumab use associated with PFS benefit?
+ Back: Yes, benefit was consistent with or without bevacizumab (HRs 0.72-0.75).
+Front: What was the OS HR for the USA region in the overall population?
+ Back: 0.88.
+Front: What was the OS HR for the "Rest of the World" region in the overall population?
+ Back: 0.63.
+Front: What was the OS result at the first interim analysis for the CPS $\ge 1$ group?
+ Back: Not significantly improved (HR 0.72, p=0.0084, but threshold not met).
+Front: When was the final OS result for the overall population significant?
+ Back: At the final analysis (p=0.011).
+Front: Did blinded independent central review agree with investigator-assessed PFS?
+ Back: Yes, they were concordant.
+Front: How did bevacizumab use impact OS in the CPS $\ge 1$ group?
+ Back: Benefit was seen regardless of bevacizumab use (HR 0.75).
+Front: What was the PFS HR for the CPS $\ge 10$ subgroup?
+ Back: 0.79.
+Category 6: Objective Response and Durability
+Front: What was the Objective Response Rate (ORR) in the overall population with pembrolizumab?
+ Back: 50%.
+Front: What was the ORR in the overall population with placebo?
+ Back: 41%.
+Front: What was the ORR for the CPS $\ge 1$ population with pembrolizumab?
+ Back: 53%.
+Front: What was the ORR for the CPS $\ge 1$ population with placebo?
+ Back: 47%.
+Front: What was the median Duration of Response (DOR) for the overall pembrolizumab group?
+ Back: 10.4 months.
+Front: What was the median DOR for the overall placebo group?
+ Back: 7.9 months.
+Front: What percentage of pembrolizumab responders had a DOR $\ge 12$ months?
+ Back: 47%.
+Front: What percentage of placebo responders had a DOR $\ge 12$ months?
+ Back: 28%.
+Front: Was the response benefit seen in the CPS $\ge 1$ population consistent with the overall population?
+ Back: Yes.
+Front: How many pembrolizumab participants achieved a complete response (CR)?
+ Back: 1.
+Front: How many pembrolizumab participants achieved a partial response (PR) in the CPS $\ge 1$ group?
+ Back: 103 (51%).
+Front: Was there an ORR benefit for CPS $< 1$?
+ Back: Yes, but the survival signal was not present in this group.
+Front: What is the "Clinical read" for response and durability?
+ Back: Response delta is modest, but durability consistency makes the regimen persuasive.
+Front: What was the median DOR in the CPS $\ge 1$ pembrolizumab group?
+ Back: 10.4 months.
+Front: What was the median DOR in the CPS $\ge 1$ placebo group?
+ Back: 8.1 months.
+Category 7: Safety and Adverse Events
+Front: What was the incidence of Grade $\ge 3$ Treatment-Related AEs (TRAEs) in the pembrolizumab arm?
+ Back: 68%.
+Front: What was the incidence of Grade $\ge 3$ TRAEs in the placebo arm?
+ Back: 55%.
+Front: What was the most common any-grade TRAE in both arms?
+ Back: Anaemia (50% in Pembro vs. 42% in Placebo).
+Front: What was the incidence of peripheral neuropathy in the pembrolizumab arm?
+ Back: 39%.
+Front: What percentage of pembrolizumab patients discontinued any treatment due to TRAEs?
+ Back: 38%.
+Front: What percentage of placebo patients discontinued due to TRAEs?
+ Back: 28%.
+Front: What was the incidence of Grade $\ge 3$ immune-mediated AEs in the pembrolizumab group?
+ Back: 12%.
+Front: What was the incidence of any-grade hypothyroidism in the pembrolizumab arm?
+ Back: 18%.
+Front: What any-grade immune-mediated AE occurred in 5% of pembrolizumab patients but 0% of placebo patients?
+ Back: Adrenal insufficiency.
+Front: How many treatment-related deaths occurred in the pembrolizumab group?
+ Back: 4 (1%).
+Front: What were the causes of death for the 4 treatment-related deaths in the pembro arm?
+ Back: Colitis, interstitial lung disease, AML, and intestinal perforation.
+Front: What percentage of patients had Grade $\ge 3$ neutropenia in the pembrolizumab arm?
+ Back: 14%.
+Front: What was the any-grade incidence of fatigue in the trial?
+ Back: 33-35%.
+Front: What was the any-grade incidence of alopecia?
+ Back: 34-38%.
+Front: What percentage of pembrolizumab patients had a serious TRAE?
+ Back: 33%.
+Front: Were there any new safety signals identified for this combination?
+ Back: No.
+Front: What percentage of patients had any-grade pneumonitis in the pembrolizumab group?
+ Back: 5%.
+Front: What percentage of patients in the pembro arm had infusion reactions?
+ Back: 6%.
+Front: How many pembrolizumab patients died from immune-mediated AEs?
+ Back: 2 (1%).
+Front: What was the completion rate for the EORTC QLQ-C30 at week 24?
+ Back: 69% in the pembrolizumab group and 58% in the placebo group.
+  </script>
+
+  <script>
+    const source = document.getElementById('deck-source').textContent;
+    const deck = parseDeck(source);
+    const storageKey = 'keynote-b96-flashcards-v1';
+    let progress = loadProgress();
+    let state = {
+      category: 'All',
+      mode: 'all',
+      query: '',
+      shuffled: false,
+      order: deck.map((_, index) => index),
+      position: 0,
+      flipped: false
+    };
+
+    const els = {
+      categories: document.getElementById('categories'),
+      search: document.getElementById('search'),
+      modeGroup: document.getElementById('modeGroup'),
+      flashcard: document.getElementById('flashcard'),
+      frontText: document.getElementById('frontText'),
+      backText: document.getElementById('backText'),
+      frontCategory: document.getElementById('frontCategory'),
+      backCategory: document.getElementById('backCategory'),
+      cardIndex: document.getElementById('cardIndex'),
+      answerIndex: document.getElementById('answerIndex'),
+      frontStatus: document.getElementById('frontStatus'),
+      backStatus: document.getElementById('backStatus'),
+      progressFill: document.getElementById('progressFill'),
+      flip: document.getElementById('flip'),
+      prev: document.getElementById('prev'),
+      next: document.getElementById('next'),
+      shuffle: document.getElementById('shuffle'),
+      bookmark: document.getElementById('bookmark'),
+      reset: document.getElementById('reset'),
+      queueList: document.getElementById('queueList'),
+      statTotal: document.getElementById('stat-total'),
+      statMastered: document.getElementById('stat-mastered'),
+      statReview: document.getElementById('stat-review'),
+      statBookmarked: document.getElementById('stat-bookmarked')
+    };
+
+    renderCategories();
+    bindEvents();
+    render();
+
+    function parseDeck(text) {
+      const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+      const cards = [];
+      let category = 'Uncategorized';
+      let current = null;
+
+      for (const line of lines) {
+        if (line.startsWith('Category ')) {
+          category = line.replace(/^Category\s+\d+:\s*/, '').trim();
+        } else if (line.startsWith('Front:')) {
+          current = { category, front: line.replace(/^Front:\s*/, '').trim(), back: '' };
+        } else if (line.startsWith('Back:') && current) {
+          current.back = line.replace(/^Back:\s*/, '').trim();
+          current.id = slug(`${current.category}-${current.front}-${cards.length}`);
+          cards.push(current);
+          current = null;
+        }
+      }
+      return cards;
+    }
+
+    function bindEvents() {
+      els.search.addEventListener('input', event => {
+        state.query = event.target.value.trim().toLowerCase();
+        state.position = 0;
+        state.flipped = false;
+        render();
+      });
+
+      els.modeGroup.addEventListener('click', event => {
+        const button = event.target.closest('button[data-mode]');
+        if (!button) return;
+        state.mode = button.dataset.mode;
+        state.position = 0;
+        state.flipped = false;
+        render();
+      });
+
+      els.flip.addEventListener('click', toggleFlip);
+      els.flashcard.addEventListener('click', toggleFlip);
+      els.prev.addEventListener('click', previousCard);
+      els.next.addEventListener('click', nextCard);
+      els.shuffle.addEventListener('click', () => {
+        state.shuffled = !state.shuffled;
+        state.order = state.shuffled ? shuffle(deck.map((_, index) => index)) : deck.map((_, index) => index);
+        state.position = 0;
+        state.flipped = false;
+        render();
+      });
+      els.bookmark.addEventListener('click', () => {
+        const card = currentCard();
+        if (!card) return;
+        cardProgress(card).bookmarked = !cardProgress(card).bookmarked;
+        saveProgress();
+        render();
+      });
+      els.reset.addEventListener('click', () => {
+        progress = {};
+        saveProgress();
+        state.position = 0;
+        state.flipped = false;
+        render();
+      });
+
+      document.querySelectorAll('[data-grade]').forEach(button => {
+        button.addEventListener('click', () => gradeCurrent(button.dataset.grade));
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.target.matches('input, select, textarea')) return;
+        if (event.key === ' ') {
+          event.preventDefault();
+          toggleFlip();
+        } else if (event.key === 'ArrowRight') {
+          nextCard();
+        } else if (event.key === 'ArrowLeft') {
+          previousCard();
+        } else if (event.key.toLowerCase() === 'b') {
+          els.bookmark.click();
+        }
+      });
+    }
+
+    function renderCategories() {
+      const counts = deck.reduce((acc, card) => {
+        acc[card.category] = (acc[card.category] || 0) + 1;
+        return acc;
+      }, {});
+      const entries = [['All', deck.length], ...Object.entries(counts)];
+      els.categories.innerHTML = entries.map(([name, count]) => `
+        <button type="button" data-category="${escapeAttr(name)}" aria-pressed="${name === state.category}">
+          <span>${escapeHtml(name)}</span><small>${count}</small>
+        </button>
+      `).join('');
+      els.categories.querySelectorAll('button').forEach(button => {
+        button.addEventListener('click', () => {
+          state.category = button.dataset.category;
+          state.position = 0;
+          state.flipped = false;
+          render();
+        });
+      });
+    }
+
+    function render() {
+      const cards = filteredCards();
+      if (state.position >= cards.length) state.position = Math.max(0, cards.length - 1);
+      const card = cards[state.position];
+
+      document.querySelectorAll('#modeGroup button').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.mode === state.mode));
+      });
+      document.querySelectorAll('#categories button').forEach(button => {
+        button.setAttribute('aria-pressed', String(button.dataset.category === state.category));
+      });
+      els.shuffle.setAttribute('aria-pressed', String(state.shuffled));
+      els.flashcard.classList.toggle('flipped', state.flipped);
+      els.flip.textContent = state.flipped ? 'Show question' : 'Show answer';
+
+      if (!card) {
+        els.frontText.textContent = 'No cards match this view.';
+        els.backText.textContent = 'Adjust the filters to bring cards back into the queue.';
+        els.frontCategory.textContent = state.category;
+        els.backCategory.textContent = state.category;
+        els.cardIndex.textContent = '0 / 0';
+        els.answerIndex.textContent = '0 / 0';
+        els.frontStatus.textContent = '';
+        els.backStatus.textContent = '';
+        els.bookmark.setAttribute('aria-pressed', 'false');
+        els.progressFill.style.width = '0%';
+      } else {
+        const meta = cardProgress(card);
+        const indexText = `${state.position + 1} / ${cards.length}`;
+        els.frontText.textContent = formatInline(card.front);
+        els.backText.textContent = formatInline(card.back);
+        els.frontCategory.textContent = card.category;
+        els.backCategory.textContent = card.category;
+        els.cardIndex.textContent = indexText;
+        els.answerIndex.textContent = indexText;
+        els.frontStatus.textContent = statusLabel(meta);
+        els.backStatus.textContent = statusLabel(meta);
+        els.bookmark.setAttribute('aria-pressed', String(Boolean(meta.bookmarked)));
+        els.progressFill.style.width = `${((state.position + 1) / cards.length) * 100}%`;
+      }
+
+      const totals = summarize(cards);
+      els.statTotal.textContent = cards.length;
+      els.statMastered.textContent = totals.good;
+      els.statReview.textContent = totals.review;
+      els.statBookmarked.textContent = totals.bookmarked;
+      renderQueue(cards);
+    }
+
+    function filteredCards() {
+      const ordered = state.order.map(index => deck[index]);
+      return ordered.filter(card => {
+        const meta = cardProgress(card);
+        const inCategory = state.category === 'All' || card.category === state.category;
+        const haystack = `${card.front} ${card.back} ${card.category}`.toLowerCase();
+        const matchesQuery = !state.query || haystack.includes(state.query);
+        const inMode =
+          state.mode === 'all' ||
+          (state.mode === 'review' && (meta.grade === 'again' || meta.grade === 'hard')) ||
+          (state.mode === 'bookmarked' && meta.bookmarked) ||
+          (state.mode === 'unseen' && !meta.seen);
+        return inCategory && matchesQuery && inMode;
+      });
+    }
+
+    function renderQueue(cards) {
+      const slice = cards.slice(0, 12);
+      if (!slice.length) {
+        els.queueList.innerHTML = '<div class="empty">The queue is empty.</div>';
+        return;
+      }
+      els.queueList.innerHTML = slice.map((card, index) => `
+        <button class="review-item" type="button" data-jump="${index}">
+          <b>${escapeHtml(formatInline(card.front))}</b>
+          <span>${escapeHtml(card.category)} · ${escapeHtml(statusLabel(cardProgress(card)))}</span>
+        </button>
+      `).join('');
+      els.queueList.querySelectorAll('[data-jump]').forEach(button => {
+        button.addEventListener('click', () => {
+          state.position = Number(button.dataset.jump);
+          state.flipped = false;
+          render();
+        });
+      });
+    }
+
+    function summarize(cards) {
+      return cards.reduce((acc, card) => {
+        const meta = cardProgress(card);
+        if (meta.grade === 'good') acc.good += 1;
+        if (meta.grade === 'again' || meta.grade === 'hard') acc.review += 1;
+        if (meta.bookmarked) acc.bookmarked += 1;
+        return acc;
+      }, { good: 0, review: 0, bookmarked: 0 });
+    }
+
+    function currentCard() {
+      return filteredCards()[state.position];
+    }
+
+    function toggleFlip() {
+      if (!currentCard()) return;
+      state.flipped = !state.flipped;
+      render();
+    }
+
+    function nextCard() {
+      const cards = filteredCards();
+      if (!cards.length) return;
+      state.position = (state.position + 1) % cards.length;
+      state.flipped = false;
+      render();
+    }
+
+    function previousCard() {
+      const cards = filteredCards();
+      if (!cards.length) return;
+      state.position = (state.position - 1 + cards.length) % cards.length;
+      state.flipped = false;
+      render();
+    }
+
+    function gradeCurrent(grade) {
+      const card = currentCard();
+      if (!card) return;
+      const meta = cardProgress(card);
+      meta.seen = true;
+      meta.grade = grade;
+      meta.updatedAt = Date.now();
+      saveProgress();
+      nextCard();
+    }
+
+    function cardProgress(card) {
+      if (!progress[card.id]) progress[card.id] = { seen: false, grade: null, bookmarked: false };
+      return progress[card.id];
+    }
+
+    function statusLabel(meta) {
+      if (!meta.seen && !meta.grade) return 'New';
+      if (meta.grade === 'good') return 'Good';
+      if (meta.grade === 'hard') return 'Hard';
+      if (meta.grade === 'again') return 'Again';
+      return 'Seen';
+    }
+
+    function loadProgress() {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey)) || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveProgress() {
+      localStorage.setItem(storageKey, JSON.stringify(progress));
+    }
+
+    function shuffle(items) {
+      const copy = [...items];
+      for (let i = copy.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function slug(value) {
+      return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    }
+
+    function formatInline(value) {
+      return value
+        .replace(/\$\\ge\s*([^$]+)\$/g, '≥ $1')
+        .replace(/\$<\s*([^$]+)\$/g, '< $1')
+        .replace(/\$([^$]+)\$/g, '$1')
+        .replace(/\\ge/g, '≥');
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char]));
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, '&#96;');
+    }
+  </script>
+
+
+</body></html>
